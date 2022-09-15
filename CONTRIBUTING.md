@@ -62,6 +62,6 @@ The `type` is followed by a "`!`" for breaking changes, i.e. changes that make c
 
 The `scope` of the type is to specify further what the commit changes, some examples are `database`, `api`, `ui`, `input`, etc. This is dependant on the project and should be discussed.
 
-The `description` is a very short text that describes what the commit changes.
+The `description` is a very short text that describes what the commit changes. Keep in mind that the commit message should be `72` characters or shorter by general guidelines.
 
 The `body` of the commit further describes the changes. If a breaking change is made or it addresses an issue it has a special syntax, see [examples](https://www.conventionalcommits.org/en/v1.0.0-beta.2/#examples).
