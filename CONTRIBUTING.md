@@ -1,3 +1,5 @@
+<!-- TODO: Discuss what scopes to use, if any at all, and what language should be used for documentation as well as comments. -->
+
 # Contributing
 
 ## Summary
