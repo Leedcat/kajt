@@ -14,6 +14,8 @@ The [GitHub Flow](https://docs.github.com/en/get-started/quickstart/github-flow)
 
 The name for the `feature` branch should be short and concise. Spaces are replaced by "`-`".
 
+When a `feature` branch is merged with the `main` branch, the commit message should state the version and be tagged with the version as well. The version number follows the [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html) standard. Meaning that a breaking change is considered a major version, a non-breaking change is considered a minor version and bugfixes as a patch version.
+
 ### Conventional Commits standard
 
 [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0-beta.2/) standard makes commit messages and bodies more clear and concise. Each commit should only contain small pieces or closely related changed. They follow this structure:
