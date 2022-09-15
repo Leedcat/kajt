@@ -12,29 +12,7 @@ This project follows a set of standards and conventions to enforce unity amongs 
 
 The [GitHub Flow](https://docs.github.com/en/get-started/quickstart/github-flow) is a way of creating and managing branches and code in a git project. In essence it boils down to having a long-lived `main` branch where product ready code is held and several short-lived `feature` branches for modifying the software. Once the modification is complete, a pull request is made to merge the `feature` branch with the `main` branch.
 
-This project has a naming convention for the `feature` branches that looks like this "`<type>-<issue reference>-<topic>`".
-
-The `type` is a descriptor of the main purpose of the branch according to this list:
-
--   `feat` - features
--   `fix` - bug fixes
--   `style` - syntactice changes in the code, such as indents, comments, etc. that does not affect the code
--   `docs` - changes in the documentation, README, CONTRIBUTION, LICENSE, or general doc files.
--   `refactor` - refactoring production code, renaming a variable, moving code to another file, etc.
--   `test` - adding or changing tests of the code
--   `chore` - updating grunt tasks with no production code changes, such as changing config files, and does not fit any other type
-
-The `type` is followed by a "`!`" for breaking changes, i.e. changes that make code not backwards compatible.
-
-If it addresses an issue, the issue code is placed between the `type` and the `topic`.
-
-The `topic` is a short and concise description of what the topic is of the branch, spaces are replaced by underscores.
-
-Examples:
-
--   `docs-contributing_file`
--   `feat-live_client_api_wrapper`
--   `fix-41-undefined_screen`
+The name for the `feature` branch should be short and concise. Spaces are replaced by "`-`".
 
 ### Conventional Commits standard
 
