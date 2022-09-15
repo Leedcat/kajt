@@ -4,7 +4,7 @@
 
 ## Summary
 
-This project follows a set of standards and conventions to enforce unity amongs the code base and prevent conflicts.
+This project follows a set of standards and conventions to enforce unity amongs the code base and prevent conflicts. Since this is a school project and some of the members of the group are either new to or not well acquainted with git and GitHub, there is bound to be cases where the standards or conventions are not followed.
 
 ## Standards
 
