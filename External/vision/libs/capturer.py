@@ -7,7 +7,7 @@ from win32gui import FindWindow, GetWindowRect
 import dxcam  # pyright: ignore[reportMissingTypeStubs]
 import cv2
 
-from duplicatefilter import DuplicateFilter
+from .duplicatefilter import DuplicateFilter
 
 if not 'logger' in locals():
     logger = logging.getLogger(__name__)

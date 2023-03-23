@@ -5,7 +5,7 @@ import sys
 import cv2
 import keyboard
 
-import capturer
+import libs.capturer as capturer
 
 
 image_path = input('Save path: ')
