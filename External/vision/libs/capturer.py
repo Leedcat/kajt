@@ -38,6 +38,7 @@ IntPtr = int
 
 capturer: Optional[dxcam.DXCamera] = None
 window_title: str = 'League of Legends (TM) Client'
+window_handle: 'IntPtr | None' = None
 
 
 def create_capturer():
@@ -48,28 +49,37 @@ def create_capturer():
     capturer = dxcam.create()  # nopep8 #pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
 
 
-def get_window_handle() -> Optional[IntPtr]:
+def get_window_handle() -> 'IntPtr | None':
+    global window_handle
     logger.debug(f'Attempting to find window \'{window_title}\'')
-    window_handle = FindWindow(None, window_title)
-    return window_handle or None
-
-
-def get_window_handle_blocking() -> IntPtr:
-    logger.debug('Blocking until window handle is found')
-
-    window_handle: Optional[IntPtr] = None
-    while window_handle is None:
-        window_handle = get_window_handle()
-
-    logger.debug(f'Found window handle')
+    window_handle = FindWindow(None, window_title) or None
     return window_handle
 
 
-def get_window_rect(window_handle: IntPtr) -> Optional[RECT]:
+def get_window_handle_blocking() -> IntPtr:
+    global window_handle
+    if window_handle is not None:
+        return window_handle
+
+    logger.info(f'Blocking until window handle is found for "{window_title}"')
+
+    while window_handle is None:
+        window_handle = get_window_handle()
+
+    logger.info(f'Found window handle')
+    return window_handle
+
+
+def get_window_rect() -> Optional[RECT]:
+    global window_handle
+    if window_handle is None:
+        return None
+
     logger.debug('Getting window RECT')
     window_rect = RECT(*GetWindowRect(window_handle))
 
     if not validate_window_rect(window_rect):
+        window_handle = None
         return None
 
     return RECT(*window_rect)
@@ -112,6 +122,13 @@ def get_player_rect(window_rect: RECT) -> RECT:
         player_rect_center.y + floor(window_rect_size.height * 0.2 / 2)
     )
 
+    player_rect = RECT(
+        player_rect_center.x - 128,
+        player_rect_center.y - 128,
+        player_rect_center.x + 128,
+        player_rect_center.y + 128
+    )
+
     return player_rect
 
 
@@ -134,7 +151,7 @@ def get_image(blocking: bool) -> Optional[cv2.Mat]:
     if window_handle is None:
         return None
 
-    window_rect = get_window_rect(window_handle)
+    window_rect = get_window_rect()
     if window_rect is None:
         return None
 

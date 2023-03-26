@@ -1,13 +1,15 @@
 from dataclasses import dataclass
-from enum import Enum, auto
+from enum import IntEnum, auto
 
 import logging
 import os
-import sys
 import cv2
+import pathlib
+from tqdm import tqdm
+import sys
 
 
-class Classification(Enum):
+class Classification(IntEnum):
     ATTACKING = auto()
     IDLING = auto()
     WALKING = auto()
@@ -34,22 +36,34 @@ class ImageData:
 
 
 def mainloop():
-    if len(sys.argv) < 3:
-        logging.error('Missing path arguments')
-        sys.exit(1)
 
-    load_path = sys.argv[1]
-    if not os.path.exists(load_path) or not os.path.isdir(load_path):
+    load_path = pathlib.Path(sys.argv[1] if len(
+        sys.argv) > 1 else input("Load path: "))
+    if not load_path.exists() or not load_path.is_dir():
         logging.error(f'\'{load_path}\' is not a folder')
 
-    save_path = sys.argv[2]
-    if not os.path.exists(save_path) or not os.path.isdir(save_path):
+    save_path = pathlib.Path(sys.argv[2] if len(
+        sys.argv) > 2 else input("Save path: "))
+    if not save_path.exists():
+        os.mkdir(save_path)
+    elif not save_path.is_dir():
         logging.error(f'\'{save_path}\' is not a folder')
 
-    image_names = os.listdir(load_path)
-    images = list(map(lambda image_name: ImageData(image_name, Classification.UNKNOWN,
-                  read_image(os.path.join(load_path, image_name))), image_names))
+    limit: 'int | None' = None
+    if len(sys.argv) > 3:
+        limit = int(sys.argv[3])
+
+    logging.info("Getting images")
+    image_names = list(map(lambda path: path.name, load_path.glob('*.png')))
+    if limit is not None:
+        image_names = image_names[:limit]
+    images = list(map(lambda image_name: ImageData(
+        str(image_name),
+        Classification.UNKNOWN,
+        read_image(pathlib.Path(load_path, image_name))),
+        tqdm(image_names)))
     index = 0
+    logging.info("Done")
 
     while True:
         index %= len(images)
@@ -64,7 +78,7 @@ def mainloop():
                 return
 
             if key_code == ord('s'):
-                save_images(save_path, images)
+                save_images(save_path, load_path, images)
                 return
 
             if key_code == ord('a'):
@@ -91,8 +105,8 @@ def mainloop():
                 break
 
 
-def read_image(image_path: str) -> cv2.Mat:
-    image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+def read_image(image_path: pathlib.Path) -> cv2.Mat:
+    image = cv2.imread(str(image_path), cv2.IMREAD_GRAYSCALE)
     return image
 
 
@@ -102,19 +116,31 @@ def render_image(image: ImageData, index: int, max_index: int):
                          (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 3)
     canvas = cv2.putText(canvas, f"{index}/{max_index}",  # nopep8 # pyright: ignore[reportUnknownMemberType]
                          (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 3)
+    cv2.imshow("canvas", canvas)  # nopep8 # pyright: ignore[reportUnknownMemberType]
 
 
-def save_images(save_path: str, images: 'list[ImageData]'):
-    for i, image in enumerate(images):
-        image_path = os.path.join(save_path, str(
+def save_images(save_path: pathlib.Path, load_path: pathlib.Path, images: 'list[ImageData]'):
+    logging.info(
+        f"Saving images")
+    for image in tqdm(images):
+        image_path = pathlib.Path(save_path, str(
             image.classification).lower(), image.name)
-        if not cv2.imwrite(image_path, image.image):
-            logging.error(
-                f"Could not save image \"{image.name}\" to {image_path}")
-        else:
-            logging.info(
-                f"Saved image {i+1}/{len(images)}# \"{image.name}\" as {str(image.classification)}")
+
+        old_image_path = pathlib.Path(load_path, image.name)
+
+        if not image_path.parents[0].exists():
+            os.mkdir(image_path.parents[0])
+
+        os.rename(old_image_path, image_path)
+        # if not cv2.imwrite(str(image_path), image.image):
+        #     logging.error(
+        #         f"Could not save image \"{image.name}\" to {image_path}")
+        #     sys.exit()
 
 
 if __name__ == "__main__":
+    logging.basicConfig(
+        level=logging.INFO,
+        format='[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S')
     mainloop()
