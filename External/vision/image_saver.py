@@ -4,7 +4,6 @@ import os
 import sys
 import cv2
 import keyboard
-import numpy as np
 import libs.capturer as capturer
 
 
@@ -17,8 +16,6 @@ def mainloop():
 
     toggle_save = False
 
-    previous_image: cv2.Mat = None  # pyright: ignore[reportGeneralTypeIssues]
-
     while True:
         key_code = cv2.waitKey(1)
         if key_code != -1:
@@ -30,13 +27,6 @@ def mainloop():
         image = capturer.get_image(True)
         if image is None:
             continue
-
-        # if previous_image is None:  # nopep8 # pyright: ignore[reportUnnecessaryComparison]
-        #     previous_image = image
-        #     continue
-
-        # resulting_image = np.concatenate((previous_image, image), axis=1)  # nopep8 # pyright: ignore[reportUnknownMemberType]
-        # previous_image = image
 
         if keyboard.is_pressed('o'):
             toggle_save = not toggle_save
