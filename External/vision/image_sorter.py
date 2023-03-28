@@ -5,8 +5,10 @@ import logging
 import os
 import cv2
 import pathlib
+import numpy as np
 from tqdm import tqdm
 import sys
+import tensorflow as tf
 
 
 class Classification(IntEnum):
@@ -53,6 +55,10 @@ def mainloop():
     if len(sys.argv) > 3:
         limit = int(sys.argv[3])
 
+    automatic: bool = False
+    if len(sys.argv) > 4:
+        automatic = sys.argv[4].lower() == 'auto'
+
     logging.info("Getting images")
     image_names = list(map(lambda path: path.name, load_path.glob('*.png')))
     if limit is not None:
@@ -64,6 +70,27 @@ def mainloop():
         tqdm(image_names)))
     index = 0
     logging.info("Done")
+
+    if automatic:
+        total_cert = 0
+        min_cert = 2.0
+        max_cert = 0.0
+
+        logging.info("Automatically sorting")
+        model = tf.keras.models.load_model('model.hdf5')
+        for image in tqdm(images):
+            classification, cert = classify_image(image.image, model)
+            image.classification = classification
+
+            min_cert = min(min_cert, cert)
+            max_cert = max(max_cert, cert)
+            total_cert += cert
+
+        save_images(save_path, load_path, images)
+        print(f"Average Cert: {total_cert / len(images)}")
+        print(f"Min Cert: {min_cert}")
+        print(f"Max Cert: {max_cert}")
+        return
 
     while True:
         index %= len(images)
@@ -103,6 +130,16 @@ def mainloop():
             elif key_code == ord('p'):
                 index -= 1
                 break
+
+
+def classify_image(image: cv2.Mat, model: tf.keras.Model) -> 'tuple[Classification, float]':
+    image_batch = np.expand_dims(image, axis=0)  # nopep8 # pyright: ignore[reportUnknownMemberType]
+    predictions = model.predict(image_batch, verbose=0)
+    score = tf.nn.softmax(predictions[0])
+    image_class = Classification(np.argmax(score) + 1)  # nopep8 # pyright: ignore[reportUnknownMemberType]
+    certainty = np.max(score)   # nopep8 # pyright: ignore[reportUnknownMemberType]
+
+    return (image_class, certainty)
 
 
 def read_image(image_path: pathlib.Path) -> cv2.Mat:

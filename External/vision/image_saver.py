@@ -31,8 +31,8 @@ def mainloop():
         if keyboard.is_pressed('o'):
             toggle_save = not toggle_save
 
-        is_saving_image = key_code == ord(
-            'i') or keyboard.is_pressed('i') or toggle_save
+        is_saving_image = key_code == ord('i') or \
+            keyboard.is_pressed('i') or toggle_save
 
         render_image(image, is_saving_image)
 
@@ -41,10 +41,13 @@ def mainloop():
 
 
 def render_image(image: cv2.Mat, is_saving_image: bool):
-    canvas = image.repeat(2, axis=0).repeat(2, axis=1)
+    canvas = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+    canvas = canvas.repeat(2, axis=0).repeat(2, axis=1)
+
+    color = (0, 0, 255)
 
     if is_saving_image:
-        cv2.circle(canvas, (20, 20), 20, (255, 255, 255), -1)  # nopep8 # pyright: ignore[reportUnknownMemberType]
+        cv2.circle(canvas, (20, 20), 20, color, -1)  # nopep8 # pyright: ignore[reportUnknownMemberType]
 
     cv2.imshow('canvas', canvas)  # pyright: ignore[reportUnknownMemberType]
 

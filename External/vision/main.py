@@ -19,16 +19,13 @@ def mainloop():
     global client, host, port
     capturer.create_capturer()
 
-    # client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # logging.info(f'Trying to connect to {host}:{port}')
-    # client.connect((host, port))
+    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    logging.info(f'Trying to connect to {host}:{port}')
+    client.connect((host, port))
 
-    model = tf.keras.models.load_model(
-        'models/model.09.hdf5')
+    model = tf.keras.models.load_model('model.hdf5')
 
     while True:
-        # client.send(bytes(0))
-
         image = capturer.get_image(blocking=True)
 
         if image is None:
@@ -41,6 +38,10 @@ def mainloop():
         logging.info(
             f"Classified image as {image_class} with {certainty*100:.2f}% certainty")
 
+        data = (image_class).to_bytes(1, 'big')
+        client.send(data)
+        logging.debug(f"Sent data: {data}")
+
         cv2.imshow("canvas", image)  # nopep8 # pyright: ignore[reportUnknownMemberType]
         cv2.waitKey(1)
 
@@ -48,8 +49,9 @@ def mainloop():
 def classify_image(image: cv2.Mat, model: tf.keras.Model) -> 'tuple[Classification, float]':
     image_batch = np.expand_dims(image, axis=0)  # nopep8 # pyright: ignore[reportUnknownMemberType]
     predictions = model.predict(image_batch)
-    image_class = Classification(np.argmax(predictions) + 1)  # nopep8 # pyright: ignore[reportUnknownMemberType]
-    certainty = np.max(predictions)   # nopep8 # pyright: ignore[reportUnknownMemberType]
+    score = tf.nn.softmax(predictions[0])
+    image_class = Classification(np.argmax(score) + 1)  # nopep8 # pyright: ignore[reportUnknownMemberType]
+    certainty = np.max(score)   # nopep8 # pyright: ignore[reportUnknownMemberType]
 
     return (image_class, certainty)
 
