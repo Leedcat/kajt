@@ -31,13 +31,12 @@ public class ShowGrade : MonoBehaviour
         {
             int temp = (int)Math.Round(score);   // Round to closest whole number
             grade = list[temp];
-            showgrade(grade);
+            showgrade("23");
             interval += 3;
         }
         if (timePassed > interval/3)
         {
             gradedAttack = UnityEngine.Random.Range(0, 3); // should be replaced by the actual graded attack
-            print(gradedAttack);
             if (recentAttacks.Count >= 5) {
                 recentAttacks.RemoveAt(0);
             } ;
@@ -52,9 +51,13 @@ public class ShowGrade : MonoBehaviour
         }
     }
 
-    public void showgrade(string grades)
+    public void showgrade(string grades, GameObject textPrefab)
     {
-        var gObject = Instantiate(FloatingTextPrefab) as GameObject;
+        var gObject = Instantiate(textPrefab) as GameObject;
         gObject.GetComponent<TextMesh>().text = grades;
+    }
+    public static void showgrade(string grades)
+    {
+        print(grades);
     }
 }
