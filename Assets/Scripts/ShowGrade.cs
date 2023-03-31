@@ -1,16 +1,26 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
+
 
 public class ShowGrade : MonoBehaviour
 {
     public GameObject FloatingTextPrefab;
     public float timePassed = 0f;
-    public int interval = 3;
+    public float interval = 3;
     public string grade = "";
+    public string[] list = {"bad","good","legendary"};
+    public int gradedAttack;
+    public ArrayList recentAttacks = new ArrayList{};
+
+    public float score;
+
+    public int temp;
     // Start is called before the first frame update
     void Start()
     {
+
     }
 
     // Update is called once per frame
@@ -19,9 +29,26 @@ public class ShowGrade : MonoBehaviour
         timePassed += Time.deltaTime;
         if (timePassed > interval)
         {
-            grade = (interval/3).ToString();
+            int temp = (int)Math.Round(score);   // Round to closest whole number
+            grade = list[temp];
             showgrade(grade);
             interval += 3;
+        }
+        if (timePassed > interval/3)
+        {
+            gradedAttack = UnityEngine.Random.Range(0, 3); // should be replaced by the actual graded attack
+            print(gradedAttack);
+            if (recentAttacks.Count >= 5) {
+                recentAttacks.RemoveAt(0);
+            } ;
+            recentAttacks.Add(gradedAttack);
+            score = 0;
+            foreach (int i in recentAttacks)
+            {
+                score += i;
+            };
+            score /= recentAttacks.Count;
+            score -= score % 1;
         }
     }
 
