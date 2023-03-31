@@ -58,6 +58,6 @@ public class ShowGrade : MonoBehaviour
     }
     public static void showgrade(string grades)
     {
-        Console.WriteLine(grades); ;
+        Debug.Log(grades);
     }
 }
