@@ -31,7 +31,7 @@ public class ShowGrade : MonoBehaviour
         {
             int temp = (int)Math.Round(score);   // Round to closest whole number
             grade = list[temp];
-            showgrade("23");
+            showgrade(grade);
             interval += 3;
         }
         if (timePassed > interval/3)
