@@ -14,6 +14,10 @@ client: 'socket.socket | None' = None
 host = 'localhost'
 port = 9000
 
+# model = tf.keras.models.load_model('model.hdf5')
+interpreter = tf.lite.Interpreter(model_path='model.tflite')
+classify_lite = interpreter.get_signature_runner('serving_default')
+
 
 def mainloop():
     global client, host, port
@@ -23,8 +27,6 @@ def mainloop():
     logging.info(f'Trying to connect to {host}:{port}')
     client.connect((host, port))
 
-    model = tf.keras.models.load_model('model.hdf5')
-
     while True:
         image = capturer.get_image(blocking=True)
 
@@ -33,7 +35,7 @@ def mainloop():
             # sys.exit(1)
             continue
 
-        image_class, certainty = classify_image(image, model)
+        image_class, certainty = classify_image(image)
 
         logging.info(
             f"Classified image as {image_class} with {certainty*100:.2f}% certainty")
@@ -46,9 +48,10 @@ def mainloop():
         cv2.waitKey(1)
 
 
-def classify_image(image: cv2.Mat, model: tf.keras.Model) -> 'tuple[Classification, float]':
-    image_batch = np.expand_dims(image, axis=0)  # nopep8 # pyright: ignore[reportUnknownMemberType]
-    predictions = model.predict(image_batch)
+def classify_image(image: cv2.Mat) -> 'tuple[Classification, float]':
+    global classify_lite
+    image_batch = np.expand_dims(image, axis=(0, 3)).astype('float32')  # nopep8 # pyright: ignore[reportUnknownMemberType]
+    predictions = classify_lite(rescaling_input=image_batch)['outputs']
     score = tf.nn.softmax(predictions[0])
     image_class = Classification(np.argmax(score) + 1)  # nopep8 # pyright: ignore[reportUnknownMemberType]
     certainty = np.max(score)   # nopep8 # pyright: ignore[reportUnknownMemberType]
