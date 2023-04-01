@@ -99,7 +99,6 @@ public class VisionClient : MonoBehaviour
         if (classification != Classification.WALKING && this.movementStopwatch.IsRunning)
         {
             this.movementStopwatch.Stop();
-            this.walkingTime += this.movementStopwatch.ElapsedMilliseconds / 1000f;
         }
         else if (classification == Classification.WALKING && !this.movementStopwatch.IsRunning)
         {
@@ -111,9 +110,11 @@ public class VisionClient : MonoBehaviour
             if (this.attackStopwatch.IsRunning && this.attackStopwatch.ElapsedMilliseconds > 100)
             {
                 this.attackStopwatch.Stop();
+
                 int score = this.CalculateScore();
+
+                this.movementStopwatch.Reset();
                 this.scoreQueue.Enqueue(score);
-                this.walkingTime = 0;
             }
             else if (!this.attackStopwatch.IsRunning)
             {
@@ -124,6 +125,7 @@ public class VisionClient : MonoBehaviour
 
     private int CalculateScore()
     {
+        this.walkingTime = this.movementStopwatch.ElapsedMilliseconds / 1000f;
         this.attackMinTime = API.instance.attackTime;
         this.attackTime = this.attackStopwatch.ElapsedMilliseconds / 1000f;
 
