@@ -79,4 +79,4 @@ crashlytics-build.properties
 
 # python
 /External/vision/venv
-/External/vision/__pycache__
+/External/vision/**/__pycache__
