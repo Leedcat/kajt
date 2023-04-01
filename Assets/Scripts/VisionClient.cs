@@ -126,9 +126,9 @@ public class VisionClient : MonoBehaviour
 
     private int CalculateScore()
     {
-        this.walkingTime = this.movementStopwatch.ElapsedMilliseconds / 1000f;
         this.attackMinTime = API.instance.attackTime;
-        this.attackTime = this.attackStopwatch.ElapsedMilliseconds / 1000f;
+        this.attackTime = Mathf.Max(this.attackStopwatch.ElapsedMilliseconds / 1000f, this.attackMinTime);
+        this.walkingTime = Mathf.Min(this.movementStopwatch.ElapsedMilliseconds / 1000f, this.attackTime);
 
         return (int)((this.walkingTime / this.attackTime) * (this.attackMinTime / this.attackTime) * 100);
     }
