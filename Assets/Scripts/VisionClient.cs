@@ -14,8 +14,14 @@ public class VisionClient : MonoBehaviour
     private Thread thread;
     private System.Diagnostics.Stopwatch attackStopwatch = new System.Diagnostics.Stopwatch();
     private System.Diagnostics.Stopwatch movementStopwatch = new System.Diagnostics.Stopwatch();
-    private long movementTimeMilliseconds = 0;
     private ConcurrentQueue<int> scoreQueue = new ConcurrentQueue<int>();
+    [field: SerializeField] private GameObject awaitingConnectionUI;
+    [field: SerializeField] private GameObject connectedUI;
+    [field: SerializeField] private float attackTime;
+    [field: SerializeField] private float attackMinTime;
+    [field: SerializeField] private float walkingTime;
+    private TcpListener server;
+    private bool isConnected = false;
 
     // Start is called before the first frame update
     void Start()
@@ -28,6 +34,9 @@ public class VisionClient : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        this.connectedUI.SetActive(this.isConnected);
+        this.awaitingConnectionUI.SetActive(!this.isConnected);
+
         int score;
         if (!this.scoreQueue.TryDequeue(out score))
         {
@@ -41,16 +50,20 @@ public class VisionClient : MonoBehaviour
     private void RecieveData()
     {
         byte[] buffer = new byte[256];
-        TcpListener server = new TcpListener(this.host, this.port);
+        this.server = new TcpListener(this.host, this.port);
         server.Start();
 
         while (true)
         {
+            this.isConnected = false;
             Debug.Log("Waiting for Vision Client to connect");
-            using TcpClient client = server.AcceptTcpClient();
-            Debug.Log("Vision Client connected");
 
-            NetworkStream stream = client.GetStream();
+            using TcpClient client = server.AcceptTcpClient();
+
+            Debug.Log("Vision Client connected");
+            this.isConnected = true;
+
+            using NetworkStream stream = client.GetStream();
 
             int bytesRead = -1;
 
@@ -67,6 +80,10 @@ public class VisionClient : MonoBehaviour
 
     private void OnDisable()
     {
+        if (this.server != null)
+        {
+            this.server.Stop();
+        }
         this.thread.Abort();
     }
 
@@ -81,13 +98,11 @@ public class VisionClient : MonoBehaviour
     {
         if (classification != Classification.WALKING && this.movementStopwatch.IsRunning)
         {
-            Debug.Log("Stopped Movement Stopwatch");
             this.movementStopwatch.Stop();
-            this.movementTimeMilliseconds += this.movementStopwatch.ElapsedMilliseconds;
+            this.walkingTime += this.movementStopwatch.ElapsedMilliseconds / 1000f;
         }
         else if (classification == Classification.WALKING && !this.movementStopwatch.IsRunning)
         {
-            Debug.Log("Started Movement Stopwatch");
             this.movementStopwatch.Start();
         }
 
@@ -95,15 +110,13 @@ public class VisionClient : MonoBehaviour
         {
             if (this.attackStopwatch.IsRunning && this.attackStopwatch.ElapsedMilliseconds > 100)
             {
-                Debug.Log("Stopped Attack Stopwatch");
                 this.attackStopwatch.Stop();
                 int score = this.CalculateScore();
                 this.scoreQueue.Enqueue(score);
-                this.movementTimeMilliseconds = 0;
+                this.walkingTime = 0;
             }
             else if (!this.attackStopwatch.IsRunning)
             {
-                Debug.Log("Started Attack Stopwatch");
                 this.attackStopwatch.Start();
             }
         }
@@ -111,10 +124,9 @@ public class VisionClient : MonoBehaviour
 
     private int CalculateScore()
     {
-        // TODO: Switch this to getting from API
-        long attackMinTimeMilliseconds = 1000;
-        long attackDeltaTimeMilliseconds = this.attackStopwatch.ElapsedMilliseconds - attackMinTimeMilliseconds;
+        this.attackMinTime = API.instance.attackTime;
+        this.attackTime = this.attackStopwatch.ElapsedMilliseconds / 1000f;
 
-        return (int)(this.movementTimeMilliseconds / attackDeltaTimeMilliseconds);
+        return (int)((this.walkingTime / this.attackTime) * (this.attackMinTime / this.attackTime) * 100);
     }
 }
