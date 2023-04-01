@@ -114,6 +114,7 @@ public class VisionClient : MonoBehaviour
                 int score = this.CalculateScore();
 
                 this.movementStopwatch.Reset();
+                this.attackStopwatch.Restart();
                 this.scoreQueue.Enqueue(score);
             }
             else if (!this.attackStopwatch.IsRunning)
