@@ -6,83 +6,60 @@ using System;
 
 public class ShowGrade : MonoBehaviour
 {
-    //public static ShowGrade instance;
-
-
+    public static ShowGrade instance;
     public GameObject picture;
-    public float timePassed = 0f;
-    public float interval = 3;
-    public Sprite grade;
-    public int gradedAttack;
-    public ArrayList recentAttacks = new ArrayList { };
-
-
-    private SpriteRenderer rend;
     private Sprite missedSprite, badSprite, goodSprite, perfectSprite;
+    [Header("Score Limits")]
+    [field: SerializeField] private int perfectScoreLimit;
+    [field: SerializeField] private int goodScoreLimit;
+    [field: SerializeField] private int badScoreLimit;
 
     public ArrayList list;
-
-    public float score = 4.0f;
-
-    public int temp;
-    // Start is called before the first frame update
     void Start()
     {
 
-        // if (ShowGrade.instance == null){Debug.Log(instance);Debug.Log(ShowGrade.instance);ShowGrade.instance = this;
+        if (ShowGrade.instance == null)
+        {
+            ShowGrade.instance = this;
+        }
+
         missedSprite = Resources.Load<Sprite>("Missed");
         badSprite = Resources.Load<Sprite>("Bad");
         goodSprite = Resources.Load<Sprite>("Good");
         perfectSprite = Resources.Load<Sprite>("Perfect");
-        rend = picture.GetComponent<SpriteRenderer>();
 
-    list = new ArrayList { missedSprite, badSprite, goodSprite, perfectSprite};
+        list = new ArrayList { missedSprite, badSprite, goodSprite, perfectSprite };
     }
-
-    // Update is called once per frame
-    void Update()
+    public void ShowScore(int score)
     {
-        timePassed += Time.deltaTime;
-        if (timePassed > interval/9)
+        Sprite sprite;
+        if (score >= this.perfectScoreLimit)
         {
-            int temp = (int)Math.Round(score);   // Round to closest whole number
-            if (temp != 0)
-            {
-                temp -= 1;
-            }
-            grade = list[temp] as Sprite;
-            showGrade(grade);
-            
+            sprite = this.perfectSprite;
+        }
+        else if (score >= this.goodScoreLimit)
+        {
+            sprite = this.goodSprite;
+        }
+        else if (score >= this.badScoreLimit)
+        {
+            sprite = this.badSprite;
+        }
+        else
+        {
+            sprite = this.missedSprite;
         }
 
-        if (timePassed > interval / 9) 
-        {
-            gradedAttack = UnityEngine.Random.Range(0, 100); // Should be replaced by the actual graded attack
-            if (recentAttacks.Count >= 2)  // Grade your 10 most recent attacks
-            {
-                recentAttacks.RemoveAt(0);
-            }; 
-            recentAttacks.Add(gradedAttack);
-            score = 0;
-            foreach (int i in recentAttacks)
-            {
-                score += i;
-            };
-            score /= 25;
-            score /= recentAttacks.Count;
-            interval += 3;
-        }
+        GameObject gObject = Instantiate(picture);
+        gObject.GetComponent<SpriteRenderer>().sprite = sprite;
     }
 
-    public void showGrade(Sprite grades) 
+    public static int CalculateScore(float attackTime, float walkingTime)
     {
-        Debug.Log("color is " + grades);
-        rend.sprite = grades;
-        var gObject = Instantiate(picture) as GameObject;
+        float attackMinTime = API.instance.attackTime;
+        attackTime = Mathf.Max(attackTime, attackMinTime);
+        walkingTime = Mathf.Min(walkingTime, attackTime);
 
-    }
-    public static void showGrade()
-    {
-        Debug.Log("Final score is " + "");
+        return (int)((walkingTime / attackTime) * (attackMinTime / attackTime) * 100);
     }
 }

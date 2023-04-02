@@ -17,9 +17,7 @@ public class VisionClient : MonoBehaviour
     private ConcurrentQueue<int> scoreQueue = new ConcurrentQueue<int>();
     [field: SerializeField] private GameObject awaitingConnectionUI;
     [field: SerializeField] private GameObject connectedUI;
-    [field: SerializeField] private float attackTime;
-    [field: SerializeField] private float attackMinTime;
-    [field: SerializeField] private float walkingTime;
+
     private TcpListener server;
     private bool isConnected = false;
 
@@ -45,6 +43,7 @@ public class VisionClient : MonoBehaviour
 
         // TODO: Show grade with something akin to ShowGrade.showgrade()
         Debug.Log("Score: " + score);
+        ShowGrade.instance.ShowScore(score);
     }
 
     private void RecieveData()
@@ -107,11 +106,12 @@ public class VisionClient : MonoBehaviour
 
         if (classification == Classification.ATTACKING)
         {
-            if (this.attackStopwatch.IsRunning && this.attackStopwatch.ElapsedMilliseconds > 100)
+            // API.instance.attackTime * 900 = API.instance.attackTime * 1000 * 0.9
+            if (this.attackStopwatch.IsRunning && this.attackStopwatch.ElapsedMilliseconds > API.instance.attackTime * 900)
             {
                 this.attackStopwatch.Stop();
 
-                int score = this.CalculateScore();
+                int score = ShowGrade.CalculateScore(this.attackStopwatch.ElapsedMilliseconds / 1000f, this.movementStopwatch.ElapsedMilliseconds / 1000f);
 
                 this.movementStopwatch.Reset();
                 this.attackStopwatch.Restart();
@@ -122,14 +122,5 @@ public class VisionClient : MonoBehaviour
                 this.attackStopwatch.Start();
             }
         }
-    }
-
-    private int CalculateScore()
-    {
-        this.attackMinTime = API.instance.attackTime;
-        this.attackTime = Mathf.Max(this.attackStopwatch.ElapsedMilliseconds / 1000f, this.attackMinTime);
-        this.walkingTime = Mathf.Min(this.movementStopwatch.ElapsedMilliseconds / 1000f, this.attackTime);
-
-        return (int)((this.walkingTime / this.attackTime) * (this.attackMinTime / this.attackTime) * 100);
     }
 }
