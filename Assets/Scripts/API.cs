@@ -9,7 +9,7 @@ public class API : MonoBehaviour
     private static readonly string URI = "https://localhost:2999/liveclientdata/activeplayer";
     public static API instance;
     private IEnumerator requestCoroutine;
-
+    [field: SerializeField] private GameObject userInMatchUI;
     [field: SerializeField] public float attackSpeed { get; private set; }
     [field: SerializeField] public float attackTime { get; private set; }
 
@@ -46,7 +46,8 @@ public class API : MonoBehaviour
                 request.certificateHandler = new CustomCertificateHandler();
                 yield return request.SendWebRequest();
 
-                if (request.result == UnityWebRequest.Result.ConnectionError)
+                this.userInMatchUI.SetActive(request.result != UnityWebRequest.Result.Success);
+                if (request.result != UnityWebRequest.Result.Success)
                 {
                     Debug.LogWarning("Request Error: " + request.error);
                     continue;
