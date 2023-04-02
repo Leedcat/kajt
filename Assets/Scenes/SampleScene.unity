@@ -417,7 +417,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1944592797}
-  - component: {fileID: 1944592796}
+  - component: {fileID: 1944592798}
   m_Layer: 0
   m_Name: showGrade
   m_TagString: Untagged
@@ -425,29 +425,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1944592796
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1944592795}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: af982bf7e81cd67469d32f6303ab2bb9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  FloatingTextPrefab: {fileID: 5781026064291419215, guid: 0866aefdfaa42b84b985ef1dafb19716, type: 3}
-  timePassed: 0
-  interval: 3
-  grade: grade
-  list:
-  - bad
-  - good
-  - legendary
-  gradedAttack: 0
-  score: 0
-  temp: 0
 --- !u!4 &1944592797
 Transform:
   m_ObjectHideFlags: 0
@@ -462,3 +439,22 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1944592798
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1944592795}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c21a7875f73cd154bab0ecfaaaf5829f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  picture: {fileID: 9154610622779110330, guid: c3c8591d20a36e44a9598dd950224b7c, type: 3}
+  timePassed: 0
+  interval: 3
+  grade: {fileID: 21300000, guid: ef7a89985b9942946bac3ad1c96bdfe2, type: 3}
+  gradedAttack: 0
+  score: 0
+  temp: 0
